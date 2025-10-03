@@ -1,0 +1,36 @@
+# RUST / CARGO ARTIFACTS
+/cli/target/
+/cli/doc/
+
+# NODE / TYPESCRIPT / VS CODE EXTENSION ARTIFACTS
+/extension/node_modules/
+
+/extension/out/
+/extension/dist/
+
+/extension/npm-debug.log\*
+/extension/yarn-error.log
+/extension/yarn-debug.log
+
+\*.vsix
+.vscode-test/
+
+\*.exe
+\*.dll
+\*.so
+\*.dylib
+
+stub-gen-\*
+
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# VS Code specific settings (user-specific configuration)
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+
+# Personal
+PLAN.md
