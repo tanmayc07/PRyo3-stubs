@@ -43,3 +43,39 @@ pub fn print_translated_py_func(py_func: &PyStubFunction) {
     print!(") -> {}: ...\n", py_func.return_type.as_str());
     io::stdout().flush().unwrap();
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::types::{PyFunction, PyStubFunction};
+
+    #[test]
+    fn test_translate_basic_types() {
+        let pyfn = PyFunction {
+            name: "foo".to_string(),
+            args: vec![
+                ("a".to_string(), "i32".to_string()),
+                ("b".to_string(), "String".to_string())
+            ],
+            return_type: "bool".to_string(),
+        };
+        let stub = pyfn.to_stub();
+        assert_eq!(stub.args, vec![
+            ("a".to_string(), "int".to_string()),
+            ("b".to_string(), "str".to_string())
+        ]);
+        assert_eq!(stub.return_type, "bool");
+    }
+
+    #[test]
+    fn test_translate_unknown_type() {
+        let pyfn = PyFunction {
+            name: "bar".to_string(),
+            args: vec![("x".to_string(), "MyType".to_string())],
+            return_type: "MyType".to_string()
+        };
+        let stub = pyfn.to_stub();
+        assert_eq!(stub.args[0].1, "Any");
+        assert_eq!(stub.return_type, "Any");
+    }
+}
