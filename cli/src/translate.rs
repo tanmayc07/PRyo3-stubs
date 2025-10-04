@@ -1,42 +1,31 @@
 use crate::types::{PyFunction, PyStubFunction};
 use std::io::{self, Write};
 
-pub fn translate_pyfn(py_func: &PyFunction) -> PyStubFunction {
-    let mut translated_args: Vec<(String, String)> = Vec::new();
+impl PyFunction {
+    pub fn to_stub(&self) -> PyStubFunction {
+        let translated_args = self.args.iter().map(|(name, ty)| {
+            let py_type = match ty.as_str() {
+                "i32"|"u32"|"usize"|"isize" => "int",
+                "f32"|"f64" => "float",
+                "bool" => "bool",
+                "char"|"String"|"&str" => "str",
+                "()" => "None",
+                _ => "Any",
+            }.to_string();
+            (name.clone(), py_type)
+        }).collect();
 
-    for arg in &py_func.args {
-        let arg_name = arg.0.clone();
-
-        let arg_type = match arg.1.as_str() {
-            "i32" | "u32" => "int",
-            "f32" | "f64" => "float",
+        let ret_type = match self.return_type.as_str() {
+            "i32"|"u32"|"usize"|"isize" => "int",
+            "f32"|"f64" => "float",
             "bool" => "bool",
-            "char" | "String" | "&str" => "str",
+            "char"|"String"|"&str" => "str",
             "()" => "None",
             _ => "Any",
-        }
-        .to_string();
+        }.to_string();
 
-        translated_args.push((arg_name, arg_type));
+        PyStubFunction { name:  self.name.clone(), args: translated_args, return_type: ret_type }
     }
-
-    let ret_type = match py_func.return_type.as_str() {
-        "i32" | "u32" => "int",
-        "f32" | "f64" => "float",
-        "bool" => "bool",
-        "char" | "String" | "&str" => "str",
-        "()" => "None",
-        _ => "Any",
-    }
-    .to_string();
-
-    let py_stub_fn = PyStubFunction {
-        name: py_func.name.clone(),
-        args: translated_args,
-        return_type: ret_type,
-    };
-
-    py_stub_fn
 }
 
 pub fn print_translated_py_func(py_func: &PyStubFunction) {

@@ -7,7 +7,7 @@ mod translate;
 mod types;
 
 use crate::ast::parse_ast_for_pyfn;
-use crate::translate::{print_translated_py_func, translate_pyfn};
+use crate::translate::print_translated_py_func;
 
 fn read_src(file_path: &Path) -> Result<File, Box<dyn std::error::Error>> {
     let contents = fs::read_to_string(file_path)?;
@@ -39,7 +39,7 @@ fn main() {
     let py_functions = parse_ast_for_pyfn(&ast);
     println!("{:#?}", &py_functions[0]);
 
-    let translated_py_fn = translate_pyfn(&py_functions[0]);
+    let translated_py_fn = py_functions[0].to_stub();
     println!("{:#?}", &translated_py_fn);
     print_translated_py_func(&translated_py_fn);
 }
