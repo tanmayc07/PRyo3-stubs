@@ -67,3 +67,90 @@ pub fn parse_ast_for_pyfn(ast: &syn::File) -> Vec<PyFunction> {
     }
     pyfunctions
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use syn::parse_quote;
+
+    #[test]
+    fn test_extract_fn_name() {
+        let func: syn::ItemFn = parse_quote! {fn foo(x: i32) -> i32 {x} };
+        assert_eq!(extract_fn_name(&func), "foo");
+    }
+
+    #[test]
+    fn test_extract_args_with_args() {
+        let func: syn::ItemFn = parse_quote! {fn foo(x: i32, y: f64) -> i32 {x}};
+        assert_eq!(
+            extract_fn_args(&func),
+            vec![
+                ("x".to_string(), "i32".to_string()),
+                ("y".to_string(), "f64".to_string())
+            ]
+        );
+    }
+
+    #[test]
+    fn test_extract_args_without_args() {
+        let func: syn::ItemFn = parse_quote! {fn foo() -> i32 {x}};
+        assert_eq!(
+            extract_fn_args(&func),
+            vec![]
+        )
+    }
+
+    #[test]
+    fn test_extract_fn_return_ty_with_ret_ty() {
+        let func: syn::ItemFn = parse_quote! {fn foo(x: i32, y:f64) -> Vec<String> {x}};
+        assert_eq!(
+            extract_fn_return_type(&func),
+            "Vec"
+        );
+    }
+
+    #[test]
+    fn test_extract_fn_return_ty_without_ret_ty() {
+        let func: syn::ItemFn = parse_quote! {fn foo(x: i32, y:f64) {x}};
+        assert_eq!(
+            extract_fn_return_type(&func),
+            "None"
+        );
+    }
+
+    #[test]
+    fn test_extract_fn_return_ty_with_complex_ret_ty() {
+        let func: syn::ItemFn = parse_quote! {fn foo() -> (i32, f64) {x}};
+        assert_eq!(
+            extract_fn_return_type(&func),
+            "Any"
+        );
+    }
+
+    #[test]
+    fn test_parse_ast_for_pyfn() {
+        let ast: syn::File = syn::parse_quote! {
+            #[pyfunction]
+            fn foo(x: i32, y: f64) -> i32 {x}
+
+            fn bar(y: bool) -> f64 {y}
+
+            #[pyfunction]
+            fn baz() -> bool {true}
+        };
+
+        let pyfns = parse_ast_for_pyfn(&ast);
+        assert_eq!(pyfns.len(), 2);
+        assert_eq!(pyfns[0].name, "foo");
+        assert_eq!(pyfns[1].name, "baz");
+        assert_eq!(
+            pyfns[0].args, vec![
+                ("x".to_string(), "i32".to_string()),
+                ("y".to_string(), "f64".to_string())
+            ]
+        );
+        assert_eq!(pyfns[1].args, vec![]);
+        assert_eq!(pyfns[0].return_type, "i32");
+        assert_eq!(pyfns[1].return_type, "bool");
+    }
+}
