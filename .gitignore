@@ -3,14 +3,14 @@
 /cli/doc/
 
 # NODE / TYPESCRIPT / VS CODE EXTENSION ARTIFACTS
-/extension/node_modules/
+/pyo3-intellisense/node_modules/
 
-/extension/out/
-/extension/dist/
+/pyo3-intellisense/out/
+/pyo3-intellisense/dist/
 
-/extension/npm-debug.log\*
-/extension/yarn-error.log
-/extension/yarn-debug.log
+/pyo3-intellisense/npm-debug.log\*
+/pyo3-intellisense/yarn-error.log
+/pyo3-intellisense/yarn-debug.log
 
 \*.vsix
 .vscode-test/
@@ -28,9 +28,11 @@ stub-gen-\*
 Thumbs.db
 
 # VS Code specific settings (user-specific configuration)
-.vscode/settings.json
-.vscode/launch.json
-.vscode/tasks.json
+pyo3-intellisense/.vscode/settings.json
+pyo3-intellisense/.vscode/launch.json
+pyo3-intellisense/.vscode/tasks.json
+pyo3-intellisense/.vscode/
 
 # Personal
 PLAN.md
+.vscode/
