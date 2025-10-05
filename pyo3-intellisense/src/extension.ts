@@ -8,9 +8,12 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.showInformationMessage('Pyo3 Stubs Generator command executed!');
 
 		if (isPyo3Project()) {
-			vscode.window.showInformationMessage('This is a Pyo3/maturin project!');
+			const watcher = vscode.workspace.createFileSystemWatcher('**/src/lib.rs');
+			watcher.onDidChange(uri => {
+				vscode.window.showInformationMessage(`Rust file changed: ${uri.fsPath}`);
+			});
 		} else {
-			vscode.window.showWarningMessage('Not a Pyo3/maturin project.');
+			vscode.window.showErrorMessage('Not a Pyo3/maturin project.');
 		}
 	});
 
