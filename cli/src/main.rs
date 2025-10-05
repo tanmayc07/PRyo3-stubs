@@ -8,7 +8,6 @@ mod translate;
 mod types;
 
 use crate::ast::parse_ast_for_pyfn;
-use crate::translate::print_translated_py_func;
 use crate::types::PyStubFunction;
 
 #[derive(Parser, Debug)]
@@ -46,11 +45,19 @@ fn main() {
 
     let py_functions = parse_ast_for_pyfn(&ast);
     
-    let stub_functions: Vec<PyStubFunction> = py_functions.iter().map(|f| f.to_stub()).collect();
+    let stub_functions: Vec<PyStubFunction> = py_functions.iter().map(|f| f.translate()).collect();
 
+    let mut stub_content = String::new();
     for stub in &stub_functions {
-        print_translated_py_func(stub);
+        stub_content += &stub.to_stub();
     }
+
+    if let Some(output_path) = cli.output {
+        std::fs::write(&output_path, stub_content).unwrap();
+    } else {
+        println!("{}", stub_content);
+    }
+
 }
 
 #[cfg(test)]

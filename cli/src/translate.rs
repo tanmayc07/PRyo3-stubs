@@ -2,7 +2,7 @@ use crate::types::{PyFunction, PyStubFunction};
 use std::io::{self, Write};
 
 impl PyFunction {
-    pub fn to_stub(&self) -> PyStubFunction {
+    pub fn translate(&self) -> PyStubFunction {
         let translated_args = self.args.iter().map(|(name, ty)| {
             let py_type = match ty.as_str() {
                 "i32"|"u32"|"usize"|"isize" => "int",
@@ -25,6 +25,19 @@ impl PyFunction {
         }.to_string();
 
         PyStubFunction { name:  self.name.clone(), args: translated_args, return_type: ret_type }
+    }
+}
+
+impl PyStubFunction {
+    pub fn to_stub(&self) -> String {
+        let mut args_str = String::new();
+        for (i, (name, typ)) in self.args.iter().enumerate() {
+            args_str.push_str(&format!("{}: {}", name, typ));
+            if i < self.args.len() - 1 {
+                args_str.push_str(", ");
+            }
+        }
+        format!("def {}({}) -> {}: ...\n", self.name, args_str, self.return_type)
     }
 }
 
@@ -59,7 +72,7 @@ mod tests {
             ],
             return_type: "bool".to_string(),
         };
-        let stub = pyfn.to_stub();
+        let stub = pyfn.translate();
         assert_eq!(stub.args, vec![
             ("a".to_string(), "int".to_string()),
             ("b".to_string(), "str".to_string())
@@ -74,7 +87,7 @@ mod tests {
             args: vec![("x".to_string(), "MyType".to_string())],
             return_type: "MyType".to_string()
         };
-        let stub = pyfn.to_stub();
+        let stub = pyfn.translate();
         assert_eq!(stub.args[0].1, "Any");
         assert_eq!(stub.return_type, "Any");
     }
