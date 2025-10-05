@@ -53,7 +53,8 @@ fn main() {
     }
 
     if let Some(output_path) = cli.output {
-        std::fs::write(&output_path, stub_content).unwrap();
+        std::fs::write(&output_path, stub_content)
+            .expect(&format!("Failed to write to output file: {:?}", output_path));
     } else {
         println!("{}", stub_content);
     }
