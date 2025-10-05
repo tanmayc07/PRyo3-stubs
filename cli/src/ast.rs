@@ -37,15 +37,31 @@ pub fn extract_fn_return_type(func: &syn::ItemFn) -> String {
         syn::ReturnType::Type(_, ty) => {
             if let syn::Type::Path(type_path) = &**ty {
                 if let Some(seg) = type_path.path.segments.last() {
-                    seg.ident.to_string()
-                } else {
-                    "Any".to_string()
+                    if seg.ident == "PyResult" {
+                        // Handle PyResult<T>
+                        if let syn::PathArguments::AngleBracketed(args) = &seg.arguments {
+                            if let Some(syn::GenericArgument::Type(inner_ty)) = args.args.first() {
+                                return extract_type_name(inner_ty);
+                            }
+                        }
+                        return "None".to_string();
+                    } else {
+                        return seg.ident.to_string();
+                    }
                 }
-            } else {
-                "Any".to_string()
-            }
+            } 
+            "Any".to_string()
         }
     }
+}
+
+fn extract_type_name(ty: &syn::Type) -> String {
+    if let syn::Type::Path(type_path) = ty {
+        if let Some(seg) = type_path.path.segments.last() {
+            return seg.ident.to_string();
+        }
+    }
+    "Any".to_string()
 }
 
 pub fn parse_ast_for_pyfn(ast: &syn::File) -> Vec<PyFunction> {

@@ -1,8 +1,8 @@
 [package]
-name = "cli"
-version = "0.1.0"
+name = "pryo3-stubs-cli"
+version = "0.1.1"
 edition = "2024"
 
 [dependencies]
-quote = "1.0.41"
+clap = { version = "4.5.48", features = ["derive"] }
 syn = { version = "2.0.106", features = ["full", "extra-traits"] }

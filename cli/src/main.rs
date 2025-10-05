@@ -1,13 +1,25 @@
 use std::path::Path;
-use std::{env, fs};
+use std::fs;
 use syn::{File, parse_file};
+use clap::Parser;
 
 mod ast;
 mod translate;
 mod types;
 
 use crate::ast::parse_ast_for_pyfn;
-use crate::translate::print_translated_py_func;
+use crate::types::PyStubFunction;
+
+#[derive(Parser, Debug)]
+#[command(name="pryo3-stubs-cli", about="Generate Python stubs from PyO3 Rust source files")]
+struct Cli {
+    #[arg(short, long)]
+    input: String,
+
+    #[arg(short, long)]
+    output: Option<String>,
+}
+
 
 fn read_src(file_path: &Path) -> Result<File, Box<dyn std::error::Error>> {
     let contents = fs::read_to_string(file_path)?;
@@ -16,14 +28,9 @@ fn read_src(file_path: &Path) -> Result<File, Box<dyn std::error::Error>> {
 }
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
+    let cli = Cli::parse();
 
-    if args.len() < 2 {
-        eprintln!("Usage: cli <path-to-file>");
-        std::process::exit(1);
-    }
-
-    let file_path = Path::new(&args[1]);
+    let file_path = Path::new(&cli.input);
     if !file_path.exists() {
         eprintln!("File does not exist: {:?}", file_path);
         std::process::exit(1);
@@ -37,11 +44,21 @@ fn main() {
         read_src(&file_path).expect(&format!("Failed to read or parse file: {:?}", file_path));
 
     let py_functions = parse_ast_for_pyfn(&ast);
-    println!("{:#?}", &py_functions[0]);
+    
+    let stub_functions: Vec<PyStubFunction> = py_functions.iter().map(|f| f.translate()).collect();
 
-    let translated_py_fn = py_functions[0].to_stub();
-    println!("{:#?}", &translated_py_fn);
-    print_translated_py_func(&translated_py_fn);
+    let mut stub_content = String::new();
+    for stub in &stub_functions {
+        stub_content += &stub.to_stub();
+    }
+
+    if let Some(output_path) = cli.output {
+        std::fs::write(&output_path, stub_content)
+            .expect(&format!("Failed to write to output file: {:?}", output_path));
+    } else {
+        println!("{}", stub_content);
+    }
+
 }
 
 #[cfg(test)]
