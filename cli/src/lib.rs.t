@@ -1,7 +1,12 @@
 use pyo3::prelude::*;
 
 #[pyfunction]
-fn add(a: i32, b: i32) -> i32 {
+fn add(a: i32, b: i32) -> PyResult<i32> {
+    a + b
+}
+
+#[pyfunction]
+pub fn subtract (a: f64, b: String) -> PyResult<String> {
     a + b
 }
 
