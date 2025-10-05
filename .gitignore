@@ -1,3 +1,7 @@
+# Personal
+PLAN.md
+.vscode/settings.json
+
 # RUST / CARGO ARTIFACTS
 /cli/target/
 /cli/doc/
@@ -28,11 +32,4 @@ stub-gen-\*
 Thumbs.db
 
 # VS Code specific settings (user-specific configuration)
-pyo3-intellisense/.vscode/settings.json
-pyo3-intellisense/.vscode/launch.json
-pyo3-intellisense/.vscode/tasks.json
-pyo3-intellisense/.vscode/
-
-# Personal
-PLAN.md
-.vscode/
+pyo3-intellisense/.vscode/c_cpp_properties.json
