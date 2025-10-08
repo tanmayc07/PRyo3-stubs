@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { isPyo3Project } from './executor';
+import { isPyo3Project, runCli } from './executor';
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log('Congratulations, your extension "pyo3-intellisense" is now active!');
@@ -9,9 +9,11 @@ export function activate(context: vscode.ExtensionContext) {
 
 		if (isPyo3Project()) {
 			const watcher = vscode.workspace.createFileSystemWatcher('**/src/lib.rs');
+
 			watcher.onDidChange(uri => {
 				vscode.window.showInformationMessage(`Rust file changed: ${uri.fsPath}`);
-			});
+				runCli(context, uri.fsPath);
+			}); 
 		} else {
 			vscode.window.showErrorMessage('Not a Pyo3/maturin project.');
 		}

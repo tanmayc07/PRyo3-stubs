@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as toml from 'toml';
+import { execFile } from 'child_process';
 
 export function isPyo3Project(): boolean {
     const folders = vscode.workspace.workspaceFolders;
@@ -22,4 +23,20 @@ export function isPyo3Project(): boolean {
         }
     }
     return false;
+}
+
+export function getCliBinaryPath(context: vscode.ExtensionContext): string {
+    return path.join(context.extensionPath, 'bin', 'pryo3-stubs-cli-macos');
+}
+
+export function runCli(context: vscode.ExtensionContext, libPath: string) {
+    const cliPath = getCliBinaryPath(context);
+    const outputPath = path.join(path.dirname(libPath), 'stubs.pyi');
+    execFile(cliPath, ['--input', libPath, '--output', outputPath], (error, stdout, stderr) => {
+        if (error) {
+            vscode.window.showErrorMessage(`Stub generation failed: ${stderr || error.message}`);
+        } else {
+            vscode.window.showInformationMessage('Stub generation succeeded!');
+        }
+    });
 }
